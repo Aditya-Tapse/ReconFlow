@@ -1,0 +1,116 @@
+[
+  {
+    "po_number": "PO-1001",
+    "vendor_id": 1,
+    "currency": "INR",
+    "total_amount": 100000.00,
+    "invoiced_amount": 75000.00,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "Managed IT support - Q1", "quantity": 1, "unit_price": 60000.00, "amount": 60000.00 },
+      { "description": "On-site engineer visits", "quantity": 8, "unit_price": 5000.00, "amount": 40000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1002",
+    "vendor_id": 1,
+    "currency": "INR",
+    "total_amount": 50000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "Network switch - 24 port", "quantity": 2, "unit_price": 25000.00, "amount": 50000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1003",
+    "vendor_id": 2,
+    "currency": "INR",
+    "total_amount": 250000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "ERP implementation - phase 1", "quantity": 1, "unit_price": 250000.00, "amount": 250000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1004",
+    "vendor_id": 2,
+    "currency": "INR",
+    "total_amount": 60000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "Software support retainer", "quantity": 1, "unit_price": 60000.00, "amount": 60000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1005",
+    "vendor_id": 3,
+    "currency": "INR",
+    "total_amount": 15000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "A4 paper - 50 reams", "quantity": 50, "unit_price": 220.00, "amount": 11000.00 },
+      { "description": "Toner cartridges", "quantity": 4, "unit_price": 1000.00, "amount": 4000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1006",
+    "vendor_id": 3,
+    "currency": "INR",
+    "total_amount": 8000.00,
+    "invoiced_amount": 8000.00,
+    "status": "CLOSED",
+    "line_items": [
+      { "description": "Office stationery kit", "quantity": 10, "unit_price": 800.00, "amount": 8000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1007",
+    "vendor_id": 4,
+    "currency": "USD",
+    "total_amount": 12000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "Precision bearings - batch", "quantity": 400, "unit_price": 30.00, "amount": 12000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1008",
+    "vendor_id": 4,
+    "currency": "INR",
+    "total_amount": 80000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "Laptop", "quantity": 1, "unit_price": 70000.00, "amount": 70000.00 },
+      { "description": "Docking station", "quantity": 1, "unit_price": 8000.00, "amount": 8000.00 },
+      { "description": "Keyboard", "quantity": 1, "unit_price": 2000.00, "amount": 2000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1009",
+    "vendor_id": 5,
+    "currency": "INR",
+    "total_amount": 45000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "Business process consulting - March", "quantity": 1, "unit_price": 45000.00, "amount": 45000.00 }
+    ]
+  },
+  {
+    "po_number": "PO-1010",
+    "vendor_id": 6,
+    "currency": "INR",
+    "total_amount": 30000.00,
+    "invoiced_amount": 0,
+    "status": "OPEN",
+    "line_items": [
+      { "description": "Facility housekeeping - monthly", "quantity": 1, "unit_price": 30000.00, "amount": 30000.00 }
+    ]
+  }
+]

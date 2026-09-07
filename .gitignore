@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+*.db
+*.sqlite3
+
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+.env
+.env.local
+
+frontend/node_modules/
+frontend/.next/
+frontend/dist/
+
+.DS_Store
+.vscode/
+.idea/
+git 

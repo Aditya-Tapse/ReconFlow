@@ -1,0 +1,54 @@
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import Invoice
+from app.schemas.invoice import InvoiceCreateResponse, InvoiceOut, AuditEventOut
+from app.services.audit import log_event
+from app.utils.storage import save_upload
+
+router = APIRouter(prefix="/api/invoices", tags=["invoices"])
+
+ALLOWED_CONTENT_TYPES = {"application/pdf"}
+
+
+@router.post("", response_model=InvoiceCreateResponse)
+async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+
+    file_path = save_upload(file.filename, content)
+
+    invoice = Invoice(filename=file.filename, file_path=file_path, status="PROCESSING")
+    db.add(invoice)
+    db.commit()
+    db.refresh(invoice)
+
+    log_event(db, invoice.id, "INVOICE_RECEIVED", f"Received file {file.filename}")
+
+    return InvoiceCreateResponse(invoice_id=f"INV_CASE_{invoice.id}", status=invoice.status)
+
+
+@router.get("", response_model=list[InvoiceOut])
+def list_invoices(db: Session = Depends(get_db)):
+    return db.query(Invoice).order_by(Invoice.created_at.desc()).all()
+
+
+@router.get("/{invoice_id}", response_model=InvoiceOut)
+def get_invoice(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return invoice
+
+
+@router.get("/{invoice_id}/audit-trail", response_model=list[AuditEventOut])
+def get_audit_trail(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return invoice.audit_events

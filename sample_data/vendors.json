@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Acme Technologies Pvt Ltd",
+    "tax_id": "27AACCA1234F1Z5"
+  },
+  {
+    "id": 2,
+    "name": "Alpha Systems India Private Limited",
+    "tax_id": "29AAACA5678G1Z2"
+  },
+  {
+    "id": 3,
+    "name": "Global Office Supplies",
+    "tax_id": "07AABCG4321H1Z9"
+  },
+  {
+    "id": 4,
+    "name": "Vertex Industrial Components",
+    "tax_id": "24AADCV9988K1Z3"
+  },
+  {
+    "id": 5,
+    "name": "Nova Business Solutions",
+    "tax_id": "19AAFCN2211M1Z7"
+  },
+  {
+    "id": 6,
+    "name": "Orion Facility Management Services",
+    "tax_id": "33AAJCO6655P1Z1"
+  }
+]
