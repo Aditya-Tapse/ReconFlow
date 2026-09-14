@@ -7,7 +7,7 @@ from app.api.invoices import router as invoices_router
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Invoice AI - AP Invoice Processing")
+app = FastAPI(title="ReconFlow - AP Invoice Processing")
 
 app.add_middleware(
     CORSMiddleware,

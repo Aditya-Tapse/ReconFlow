@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, Date, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -23,6 +23,8 @@ class Invoice(Base):
     total = Column(Numeric(14, 2), nullable=True)
 
     status = Column(String, default="PROCESSING", index=True)
+    extraction_method = Column(String, nullable=True)
+    extraction_evidence = Column(Text, nullable=True)
     matched_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
     matched_po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
 

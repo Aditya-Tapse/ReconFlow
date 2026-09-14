@@ -1,10 +1,18 @@
+import json
+
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Invoice
-from app.schemas.invoice import InvoiceCreateResponse, InvoiceOut, AuditEventOut
+from app.schemas.invoice import (
+    InvoiceCreateResponse,
+    InvoiceOut,
+    AuditEventOut,
+    EvidenceItemOut,
+)
 from app.services.audit import log_event
+from app.services.invoice_extraction import run_extraction
 from app.utils.storage import save_upload
 
 router = APIRouter(prefix="/api/invoices", tags=["invoices"])
@@ -30,6 +38,8 @@ async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get
 
     log_event(db, invoice.id, "INVOICE_RECEIVED", f"Received file {file.filename}")
 
+    run_extraction(db, invoice)
+
     return InvoiceCreateResponse(invoice_id=f"INV_CASE_{invoice.id}", status=invoice.status)
 
 
@@ -52,3 +62,13 @@ def get_audit_trail(invoice_id: int, db: Session = Depends(get_db)):
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
     return invoice.audit_events
+
+
+@router.get("/{invoice_id}/evidence", response_model=list[EvidenceItemOut])
+def get_evidence(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    if not invoice.extraction_evidence:
+        return []
+    return json.loads(invoice.extraction_evidence)
