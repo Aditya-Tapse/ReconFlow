@@ -35,6 +35,24 @@ class Decision(Base):
     invoice = relationship("Invoice", back_populates="decision")
 
 
+class POMatchCandidate(Base):
+    __tablename__ = "po_match_candidates"
+
+    id = Column(Integer, primary_key=True)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"), nullable=False)
+    po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=False)
+    score = Column(Numeric(5, 2), nullable=False)
+    vendor_score = Column(Numeric(5, 2), nullable=True)
+    amount_score = Column(Numeric(5, 2), nullable=True)
+    line_item_score = Column(Numeric(5, 2), nullable=True)
+    date_score = Column(Numeric(5, 2), nullable=True)
+    reason = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    invoice = relationship("Invoice")
+    purchase_order = relationship("PurchaseOrder")
+
+
 class AuditEvent(Base):
     __tablename__ = "audit_events"
 

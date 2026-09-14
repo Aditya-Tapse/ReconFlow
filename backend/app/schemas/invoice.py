@@ -49,3 +49,13 @@ class InvoiceOut(BaseModel):
     total: Optional[float] = None
     created_at: datetime
     line_items: list[InvoiceLineItemOut] = []
+
+    matched_vendor_id: Optional[int] = None
+    vendor_match_confidence: Optional[float] = None
+    vendor_match_method: Optional[str] = None
+    vendor_match_reason: Optional[str] = None
+
+    matched_po_id: Optional[int] = None
+    po_match_confidence: Optional[float] = None
+    po_match_method: Optional[str] = None
+    po_match_reason: Optional[str] = None

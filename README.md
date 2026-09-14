@@ -1,8 +1,8 @@
 # ReconFlow — AP Invoice Processing
 
-Status: Day 2 of the 7-day plan. PDF ingestion, extraction, and structured
-invoice data are working end-to-end. Matching, validation, and the decision
-engine come in later days.
+Status: Day 3 of the 7-day plan. PDF ingestion, extraction, validation,
+duplicate detection, and vendor/PO matching are working end-to-end. The
+reconciliation and decision engine come in Day 4.
 
 ## What works right now
 
@@ -28,6 +28,26 @@ engine come in later days.
 - Missing fields are returned as `null` rather than guessed; extraction
   failures are caught, logged to the audit trail, and leave the invoice in
   `EXTRACTION_FAILED` status instead of crashing the request
+- `GET /api/invoices/{id}/validation-results` — required-field checks,
+  arithmetic checks (line total, subtotal, subtotal+tax=total, ±1.00
+  tolerance), and duplicate detection, each as a pass/fail rule with a reason
+- `GET /api/invoices/{id}/po-candidates` — ranked PO candidates and their
+  score breakdown when the invoice had no explicit PO reference
+- Duplicate detection: same vendor + same invoice number is a blocking
+  duplicate; same vendor + same date + same total is a possible duplicate
+  flagged for review. Both reference the specific prior invoice they matched
+- Vendor matching: tax ID exact match → normalized-name exact match →
+  RapidFuzz fuzzy match, in that priority order, each with a confidence score
+  and reason
+- PO matching: an explicit PO reference is looked up and vendor-checked (a
+  PO belonging to a different vendor is refused, never auto-matched); with no
+  PO reference, open POs for the matched vendor are scored (40% vendor, 30%
+  amount against the PO's *remaining* balance, 20% line-item similarity, 10%
+  date proximity) and ranked — ≥90% auto-matches, 70–90% is left for manual
+  review, below that is unmatched. All candidates and their score breakdown
+  are kept, not just the winner
+- Invoice reaches `VALIDATED` status once processing completes; processing
+  failures are caught and logged the same way extraction failures are
 
 ## Setup
 
@@ -69,13 +89,19 @@ curl -X POST http://127.0.0.1:8000/api/invoices \
 curl http://127.0.0.1:8000/api/invoices
 curl http://127.0.0.1:8000/api/invoices/1/audit-trail
 curl http://127.0.0.1:8000/api/invoices/1/evidence
+curl http://127.0.0.1:8000/api/invoices/1/validation-results
+curl http://127.0.0.1:8000/api/invoices/1/po-candidates
 ```
 
-Two generated sample invoices are in `sample_data/invoices/` — one
-machine-readable (`invoice_acme_po1002.pdf`, exercises the native-text path)
-and one image-only to force the OCR/vision fallback
-(`invoice_globaloffice_scanned.pdf`). Regenerate or extend them with
-`python scripts/generate_sample_invoices.py`.
+Generated sample invoices are in `sample_data/invoices/`:
+`invoice_acme_po1002.pdf` (native-text, explicit PO reference — matches
+PO-1002 exactly), `invoice_acme_no_po_reference.pdf` (same invoice with no PO
+reference stated, to exercise candidate scoring), and
+`invoice_globaloffice_scanned.pdf` (image-only, to force the OCR/vision
+fallback). Regenerate or extend them with
+`python scripts/generate_sample_invoices.py`. Uploading
+`invoice_acme_po1002.pdf` twice is the easiest way to see duplicate detection
+fire.
 
 ## Project layout
 
@@ -92,10 +118,15 @@ reconflow/
 │   │   ├── models/                  ORM models for all entities
 │   │   ├── schemas/                 Pydantic response + extraction models
 │   │   ├── services/
-│   │   │   ├── audit.py             audit event logging
-│   │   │   ├── pdf_processing.py    PyMuPDF text extraction + page rendering
-│   │   │   ├── invoice_extraction.py orchestrates extraction + persistence
-│   │   │   └── llm/                 provider-agnostic extraction (ollama/openai/anthropic)
+│   │   │   ├── audit.py               audit event logging
+│   │   │   ├── pdf_processing.py      PyMuPDF text extraction + page rendering
+│   │   │   ├── invoice_extraction.py  orchestrates extraction + persistence
+│   │   │   ├── llm/                   provider-agnostic extraction (ollama/openai/anthropic)
+│   │   │   ├── validation.py          required-field + arithmetic checks
+│   │   │   ├── duplicate_detection.py strong/possible duplicate checks
+│   │   │   ├── vendor_matching.py     tax ID / normalized name / fuzzy vendor matching
+│   │   │   ├── po_matching.py         explicit-reference + candidate-scoring PO matching
+│   │   │   └── invoice_processing.py  orchestrates validation + matching after extraction
 │   │   └── utils/                   file storage, vendor name normalization
 │   ├── scripts/generate_sample_invoices.py   builds test PDFs into sample_data/invoices/
 │   ├── uploads/                     stored invoice PDFs
@@ -115,8 +146,10 @@ sets up the cumulative/split-PO overbilling edge case for Day 5.
 `PO-1008` has three separate line items (Laptop, Dock, Keyboard) that sum to
 its total — this sets up the bundled-invoice-vs-itemized-PO edge case.
 
-## Next: Day 3
+## Next: Day 4
 
-Invoice-level validation (required fields, arithmetic checks), duplicate
-detection, vendor matching (tax ID / normalized name / fuzzy), and PO matching
-(explicit reference and candidate scoring when the PO reference is missing).
+Reconciliation and the decision engine: vendor/currency match rules,
+duplicate → reject, invoice amount vs. the PO's *remaining* balance, unit
+price and quantity tolerances, and a deterministic
+APPROVED / MANUAL_REVIEW / REJECTED decision built from the validation and
+matching results Day 3 already produces.

@@ -4,15 +4,17 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Invoice
+from app.models import Invoice, POMatchCandidate
 from app.schemas.invoice import (
     InvoiceCreateResponse,
     InvoiceOut,
     AuditEventOut,
     EvidenceItemOut,
 )
+from app.schemas.validation import POMatchCandidateOut, ValidationResultOut
 from app.services.audit import log_event
 from app.services.invoice_extraction import run_extraction
+from app.services.invoice_processing import run_processing
 from app.utils.storage import save_upload
 
 router = APIRouter(prefix="/api/invoices", tags=["invoices"])
@@ -39,6 +41,7 @@ async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get
     log_event(db, invoice.id, "INVOICE_RECEIVED", f"Received file {file.filename}")
 
     run_extraction(db, invoice)
+    run_processing(db, invoice)
 
     return InvoiceCreateResponse(invoice_id=f"INV_CASE_{invoice.id}", status=invoice.status)
 
@@ -72,3 +75,24 @@ def get_evidence(invoice_id: int, db: Session = Depends(get_db)):
     if not invoice.extraction_evidence:
         return []
     return json.loads(invoice.extraction_evidence)
+
+
+@router.get("/{invoice_id}/validation-results", response_model=list[ValidationResultOut])
+def get_validation_results(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return invoice.validation_results
+
+
+@router.get("/{invoice_id}/po-candidates", response_model=list[POMatchCandidateOut])
+def get_po_candidates(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return (
+        db.query(POMatchCandidate)
+        .filter(POMatchCandidate.invoice_id == invoice_id)
+        .order_by(POMatchCandidate.score.desc())
+        .all()
+    )

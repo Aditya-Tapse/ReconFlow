@@ -26,7 +26,14 @@ class Invoice(Base):
     extraction_method = Column(String, nullable=True)
     extraction_evidence = Column(Text, nullable=True)
     matched_vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=True)
+    vendor_match_confidence = Column(Numeric(5, 2), nullable=True)
+    vendor_match_method = Column(String, nullable=True)
+    vendor_match_reason = Column(String, nullable=True)
+
     matched_po_id = Column(Integer, ForeignKey("purchase_orders.id"), nullable=True)
+    po_match_confidence = Column(Numeric(5, 2), nullable=True)
+    po_match_method = Column(String, nullable=True)
+    po_match_reason = Column(String, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 

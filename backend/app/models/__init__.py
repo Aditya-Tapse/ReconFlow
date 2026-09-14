@@ -1,6 +1,6 @@
 from app.models.procurement import Vendor, PurchaseOrder, POLineItem
 from app.models.invoice import Invoice, InvoiceLineItem
-from app.models.workflow import ValidationResult, Decision, AuditEvent
+from app.models.workflow import ValidationResult, Decision, AuditEvent, POMatchCandidate
 
 __all__ = [
     "Vendor",
@@ -11,4 +11,5 @@ __all__ = [
     "ValidationResult",
     "Decision",
     "AuditEvent",
+    "POMatchCandidate",
 ]

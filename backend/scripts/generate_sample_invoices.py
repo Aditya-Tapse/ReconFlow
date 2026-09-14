@@ -22,6 +22,23 @@ CLEAN_INVOICE = [
     "Total: 59000.00",
 ]
 
+NO_PO_REFERENCE_INVOICE = [
+    "ACME TECHNOLOGIES PVT LTD",
+    "Tax ID: 27AACCA1234F1Z5",
+    "",
+    "INVOICE",
+    "Invoice Number: INV-2026-1099",
+    "Invoice Date: 2026-09-10",
+    "Currency: INR",
+    "",
+    "Description                Qty   Unit Price   Amount",
+    "Network switch - 24 port    2    25000.00     50000.00",
+    "",
+    "Subtotal: 50000.00",
+    "Tax (18% GST): 9000.00",
+    "Total: 59000.00",
+]
+
 SCANNED_INVOICE = [
     "GLOBAL OFFICE SUPPLIES",
     "Tax ID: 07AABCG4321H1Z9",
@@ -73,5 +90,6 @@ def make_scanned_pdf(path: str, lines: list[str]) -> None:
 if __name__ == "__main__":
     os.makedirs(OUT_DIR, exist_ok=True)
     make_text_pdf(os.path.join(OUT_DIR, "invoice_acme_po1002.pdf"), CLEAN_INVOICE)
+    make_text_pdf(os.path.join(OUT_DIR, "invoice_acme_no_po_reference.pdf"), NO_PO_REFERENCE_INVOICE)
     make_scanned_pdf(os.path.join(OUT_DIR, "invoice_globaloffice_scanned.pdf"), SCANNED_INVOICE)
     print(f"Generated sample invoices in {OUT_DIR}")
