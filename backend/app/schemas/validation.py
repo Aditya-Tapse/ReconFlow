@@ -11,7 +11,17 @@ class ValidationResultOut(BaseModel):
     severity: Optional[str] = None
     expected: Optional[float] = None
     actual: Optional[float] = None
+    variance_pct: Optional[float] = None
+    allowed_variance_pct: Optional[float] = None
     message: Optional[str] = None
+    created_at: datetime
+
+
+class DecisionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    decision: str
+    reason: Optional[str] = None
     created_at: datetime
 
 

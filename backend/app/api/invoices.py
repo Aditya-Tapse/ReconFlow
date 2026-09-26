@@ -1,6 +1,7 @@
 import json
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -11,8 +12,9 @@ from app.schemas.invoice import (
     AuditEventOut,
     EvidenceItemOut,
 )
-from app.schemas.validation import POMatchCandidateOut, ValidationResultOut
+from app.schemas.validation import DecisionOut, POMatchCandidateOut, ValidationResultOut
 from app.services.audit import log_event
+from app.services.decision_engine import run_decision
 from app.services.invoice_extraction import run_extraction
 from app.services.invoice_processing import run_processing
 from app.utils.storage import save_upload
@@ -42,6 +44,7 @@ async def upload_invoice(file: UploadFile = File(...), db: Session = Depends(get
 
     run_extraction(db, invoice)
     run_processing(db, invoice)
+    run_decision(db, invoice)
 
     return InvoiceCreateResponse(invoice_id=f"INV_CASE_{invoice.id}", status=invoice.status)
 
@@ -57,6 +60,14 @@ def get_invoice(invoice_id: int, db: Session = Depends(get_db)):
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
     return invoice
+
+
+@router.get("/{invoice_id}/file")
+def get_invoice_file(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    return FileResponse(invoice.file_path, media_type="application/pdf", filename=invoice.filename)
 
 
 @router.get("/{invoice_id}/audit-trail", response_model=list[AuditEventOut])
@@ -96,3 +107,13 @@ def get_po_candidates(invoice_id: int, db: Session = Depends(get_db)):
         .order_by(POMatchCandidate.score.desc())
         .all()
     )
+
+
+@router.get("/{invoice_id}/decision", response_model=DecisionOut)
+def get_decision(invoice_id: int, db: Session = Depends(get_db)):
+    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    if not invoice.decision:
+        raise HTTPException(status_code=404, detail="No decision has been made for this invoice yet")
+    return invoice.decision

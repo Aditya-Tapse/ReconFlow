@@ -1,10 +1,11 @@
 from app.config import LLM_PROVIDER
-from app.services.llm import anthropic_provider, ollama_provider, openai_provider
+from app.services.llm import anthropic_provider, gemini_provider, ollama_provider, openai_provider
 
 _PROVIDERS = {
     "anthropic": anthropic_provider,
     "openai": openai_provider,
     "ollama": ollama_provider,
+    "gemini": gemini_provider,
 }
 
 

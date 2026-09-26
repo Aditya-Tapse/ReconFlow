@@ -41,6 +41,8 @@ class Invoice(Base):
     audit_events = relationship("AuditEvent", back_populates="invoice")
     validation_results = relationship("ValidationResult", back_populates="invoice")
     decision = relationship("Decision", back_populates="invoice", uselist=False)
+    matched_vendor = relationship("Vendor")
+    matched_po = relationship("PurchaseOrder")
 
 
 class InvoiceLineItem(Base):

@@ -31,6 +31,25 @@ class EvidenceItemOut(BaseModel):
     source_text: Optional[str] = None
 
 
+class MatchedVendorOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    tax_id: Optional[str] = None
+
+
+class MatchedPOOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    po_number: str
+    currency: str
+    total_amount: float
+    invoiced_amount: float
+    status: str
+
+
 class InvoiceOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -54,8 +73,10 @@ class InvoiceOut(BaseModel):
     vendor_match_confidence: Optional[float] = None
     vendor_match_method: Optional[str] = None
     vendor_match_reason: Optional[str] = None
+    matched_vendor: Optional[MatchedVendorOut] = None
 
     matched_po_id: Optional[int] = None
     po_match_confidence: Optional[float] = None
     po_match_method: Optional[str] = None
     po_match_reason: Optional[str] = None
+    matched_po: Optional[MatchedPOOut] = None
