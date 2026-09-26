@@ -255,10 +255,10 @@ Regenerate or extend these with `python scripts/generate_sample_invoices.py`
 | Layer | Technology |
 |---|---|
 | Backend | FastAPI |
-| Database | SQLite via SQLAlchemy |
+| Database | SQLite (dev) / Postgres (deployment) via SQLAlchemy, swapped with `DATABASE_URL` |
 | Validation / schemas | Pydantic |
 | PDF parsing | PyMuPDF |
-| Structured extraction + vision OCR | Ollama (local) / OpenAI / Anthropic — pluggable |
+| Structured extraction + vision OCR | Ollama (local) / OpenAI / Anthropic / Gemini — pluggable |
 | Fuzzy matching | RapidFuzz |
 | File storage | Local `uploads/` directory |
 | Backend testing | Pytest |
@@ -287,6 +287,7 @@ Extraction needs one working provider, set in `backend/.env`:
 | `ollama` (default) | A local Ollama server (`ollama serve`) with `OLLAMA_MODEL` (default `llama3.2`) and `OLLAMA_VISION_MODEL` (default `llama3.2-vision`) pulled |
 | `openai` | `OPENAI_API_KEY` |
 | `anthropic` | `ANTHROPIC_API_KEY` |
+| `gemini` | `GEMINI_API_KEY` |
 
 Ollama is free and local, but the default small model is noticeably less
 reliable at structured extraction than OpenAI/Anthropic — and the vision
@@ -407,8 +408,8 @@ reconflow/
   (extraction → decision) completes — there's no background job queue. Fine
   for a single-user demo; would need async processing (a task queue, status
   polling) under real upload volume.
-- **SQLite, not built for concurrent writers.** Fine for this scope;
-  production would need Postgres.
+- **SQLite by default, not built for concurrent writers.** Swap in Postgres
+  via `DATABASE_URL` for anything beyond a single-user demo.
 - **No authentication or multi-tenancy.** Anyone who can reach the API can
   upload and read every invoice.
 - **Line-item matching is fuzzy-text-based.** `UNIT_PRICE_TOLERANCE`,
@@ -422,8 +423,6 @@ reconflow/
   `invoiced_amount`), but there's no equivalent cumulative *quantity*
   tracker per PO line — `QUANTITY_VALIDATION` only checks this invoice's
   quantity against the PO line's original ordered quantity.
-- **Not deployed.** This runs locally; see §10 for setup. No hosted demo
-  environment exists.
 
 ## 14. Production roadmap
 
